@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Product — Binondo Bodega Furniture</title>
+<link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+<div id="navbar"></div>
+
+<main class="container">
+  <div id="detail"></div>
+
+  <section class="section">
+    <div class="section-head"><h2>You might also like</h2></div>
+    <div class="product-grid" id="related"></div>
+  </section>
+</main>
+
+<div id="footer"></div>
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+const id = new URLSearchParams(location.search).get("id");
+const p = PRODUCTS.find(x => x.id === id) || PRODUCTS[0];
+let qty = 1;
+
+function render() {
+  const stars = "★".repeat(Math.round(p.rating)) + "☆".repeat(5 - Math.round(p.rating));
+  $("#detail").innerHTML = `
+  <div class="detail">
+    <div class="detail-img fade-up"><img src="../${p.image}" alt="${p.name}" /></div>
+    <div class="fade-up-2">
+      <span class="eyebrow">${p.category} · ${p.material}</span>
+      <h1>${p.name}</h1>
+      <div style="color:var(--muted);font-size:.95rem;">${stars} <span>(${p.reviews} reviews)</span></div>
+      <div class="price">${money(p.price)}</div>
+      <p class="desc">${p.description}</p>
+      <div class="qty-row">
+        <div class="qty-stepper">
+          <button onclick="qty=Math.max(1,qty-1);render()">−</button>
+          <span>${qty}</span>
+          <button onclick="qty++;render()">+</button>
+        </div>
+        <span style="color:var(--muted);font-size:.9rem;">${p.stock} in stock</span>
+      </div>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="addToCart('${p.id}',qty)">Add to cart · ${money(p.price*qty)}</button>
+        <a href="cart.html" class="btn btn-outline">View cart</a>
+      </div>
+      <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-size:.88rem;color:var(--muted)">
+        <div>🚚 Free delivery over $500</div>
+        <div>↩️ 60-day returns</div>
+        <div>🔧 5-year warranty</div>
+        <div>🌿 Sustainably sourced</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:1rem">
+    <h3>Reviews</h3>
+    <div style="display:grid;gap:1rem;margin-top:.75rem">
+      <div><strong>Anna · ★★★★★</strong><div style="color:var(--muted);font-size:.92rem">Beautifully made and arrived perfectly packaged. Looks even better in person.</div></div>
+      <div><strong>Marco · ★★★★☆</strong><div style="color:var(--muted);font-size:.92rem">Sturdy and exactly as pictured. Assembly took about 30 minutes.</div></div>
+      <div><strong>Lia · ★★★★★</strong><div style="color:var(--muted);font-size:.92rem">The oak finish is gorgeous. Will buy again.</div></div>
+    </div>
+  </div>`;
+}
+render();
+
+$("#related").innerHTML = PRODUCTS.filter(x => x.id !== p.id && x.category === p.category).slice(0,4).map(productCard).join("")
+  || PRODUCTS.filter(x => x.id !== p.id).slice(0,4).map(productCard).join("");
+</script>
+</body>
+</html>

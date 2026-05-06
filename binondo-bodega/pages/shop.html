@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shop — Binondo Bodega Furniture</title>
+<link rel="stylesheet" href="../css/styles.css" />
+<script>const PAGE_ACTIVE="shop";</script>
+</head>
+<body>
+<div id="navbar"></div>
+
+<main class="container section">
+  <div class="section-head">
+    <div>
+      <h2 id="title">All Furniture</h2>
+      <p id="count" style="color:var(--muted)"></p>
+    </div>
+    <select id="sort" class="btn btn-outline" style="padding:.6rem 1rem">
+      <option value="featured">Featured</option>
+      <option value="price-asc">Price: low to high</option>
+      <option value="price-desc">Price: high to low</option>
+      <option value="rating">Top rated</option>
+    </select>
+  </div>
+
+  <div class="shop-layout">
+    <aside class="filters">
+      <div class="filter-group">
+        <h4>Category</h4>
+        <div id="f-cat"></div>
+      </div>
+      <div class="filter-group">
+        <h4>Material</h4>
+        <div id="f-mat"></div>
+      </div>
+      <div class="filter-group">
+        <h4>Max price</h4>
+        <input type="range" id="f-price" min="100" max="1500" step="50" value="1500" />
+        <div class="price-display">Up to <span id="price-val">$1500</span></div>
+      </div>
+      <button class="btn btn-outline btn-block" onclick="resetFilters()">Reset filters</button>
+    </aside>
+    <div>
+      <div class="product-grid" id="grid"></div>
+      <div id="empty" class="empty" style="display:none">
+        <h3>No furniture matches</h3>
+        <p>Try widening your filters or clearing your search.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="footer"></div>
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const state = {
+  q: params.get("q") || "",
+  cats: new Set(params.get("cat") ? [params.get("cat")] : []),
+  mats: new Set(),
+  maxPrice: 1500,
+  sort: "featured",
+};
+
+function buildFilters() {
+  $("#f-cat").innerHTML = CATEGORIES.map(c => `
+    <label><input type="checkbox" value="${c.name}" ${state.cats.has(c.name)?'checked':''} onchange="toggleCat(this)"> ${c.name}</label>`).join("");
+  $("#f-mat").innerHTML = MATERIALS.map(m => `
+    <label><input type="checkbox" value="${m}" onchange="toggleMat(this)"> ${m}</label>`).join("");
+}
+function toggleCat(el){ el.checked? state.cats.add(el.value): state.cats.delete(el.value); render(); }
+function toggleMat(el){ el.checked? state.mats.add(el.value): state.mats.delete(el.value); render(); }
+function resetFilters(){ state.cats.clear(); state.mats.clear(); state.maxPrice=1500; state.q=""; $("#f-price").value=1500; $("#price-val").textContent="$1500"; buildFilters(); render(); }
+
+$("#f-price").addEventListener("input", (e)=>{ state.maxPrice=+e.target.value; $("#price-val").textContent="$"+state.maxPrice; render(); });
+$("#sort").addEventListener("change",(e)=>{ state.sort=e.target.value; render(); });
+
+function render() {
+  let list = PRODUCTS.filter(p => {
+    if (state.cats.size && !state.cats.has(p.category)) return false;
+    if (state.mats.size && !state.mats.has(p.material)) return false;
+    if (p.price > state.maxPrice) return false;
+    if (state.q && !(p.name+" "+p.category+" "+p.material).toLowerCase().includes(state.q.toLowerCase())) return false;
+    return true;
+  });
+  if (state.sort==="price-asc") list.sort((a,b)=>a.price-b.price);
+  if (state.sort==="price-desc") list.sort((a,b)=>b.price-a.price);
+  if (state.sort==="rating") list.sort((a,b)=>b.rating-a.rating);
+
+  $("#grid").innerHTML = list.map(productCard).join("");
+  $("#count").textContent = `${list.length} item${list.length===1?'':'s'}${state.q?` matching “${state.q}”`:''}`;
+  $("#empty").style.display = list.length? "none":"block";
+
+  if (state.cats.size===1) $("#title").textContent = [...state.cats][0];
+  else $("#title").textContent = state.q? `Search results` : "All Furniture";
+}
+buildFilters(); render();
+</script>
+</body>
+</html>

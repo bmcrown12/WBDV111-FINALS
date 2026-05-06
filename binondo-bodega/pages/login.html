@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sign in — Binondo Bodega Furniture</title>
+<link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+<div id="navbar"></div>
+
+<main class="auth-wrap">
+  <div class="auth-card fade-up">
+    <h2>Welcome back</h2>
+    <p class="sub">Sign in to your Binondo Bodega account.</p>
+    <form onsubmit="event.preventDefault(); doLogin();">
+      <div class="field">
+        <label>Email</label>
+        <input id="email" type="email" required value="user@demo.com" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="password" type="password" required value="password123" />
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+      <p id="err" style="color:var(--danger);font-size:.85rem;margin-top:.75rem;display:none">Invalid email or password.</p>
+    </form>
+    <div class="demo-accounts">
+      <h5>Demo accounts</h5>
+      <div class="row"><span>Super Admin</span><code>superadmin@demo.com</code></div>
+      <div class="row"><span>Admin</span><code>admin@demo.com</code></div>
+      <div class="row"><span>User</span><code>user@demo.com</code></div>
+      <div class="row" style="margin-top:.4rem"><span>Password (all)</span><code>password123</code></div>
+    </div>
+    <p style="text-align:center;font-size:.85rem;margin-top:1.25rem;color:var(--muted)">
+      No account? <a href="register.html" style="color:var(--accent-dark);font-weight:500">Create one</a>
+    </p>
+  </div>
+</main>
+
+<div id="footer"></div>
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+function doLogin() {
+  const acc = login($("#email").value.trim(), $("#password").value);
+  if (!acc) { $("#err").style.display = "block"; return; }
+  const next = new URLSearchParams(location.search).get("next");
+  if (next === "cart") { location.href = "cart.html"; return; }
+  location.href = dashboardLinkFor(acc.role);
+}
+</script>
+</body>
+</html>
